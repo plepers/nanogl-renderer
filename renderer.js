@@ -7,12 +7,12 @@ var NOOP = function(){};
 module.exports = function create( obj ){
 
 
-  var Class = function( canvas ){
+  var Class = function( cvs ){
 
-    var glAttribs = this.getContextOptions();
-    this.gl = canvas.getContext( 'webgl', glAttribs );
+    var opts = this.getContextOptions();
+    this.gl = cvs.getContext( 'webgl', opts ) || cvs.getContext( 'experimental-webgl', opts ) || cvs.getContext( 'webgl');
 
-    this.canvas = canvas;
+    this.canvas = cvs;
     this.width = 0;
     this.height = 0;
     this.frame = this._frame.bind( this );
