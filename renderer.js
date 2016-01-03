@@ -26,7 +26,7 @@ module.exports = function create( obj ){
   var proto = Class.prototype;
 
   proto.getContextOptions = obj.getContextOptions || function(){
-    return {};
+    return undefined;
   };
 
   proto.render = obj.render || NOOP;
