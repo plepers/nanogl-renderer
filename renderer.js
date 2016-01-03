@@ -75,7 +75,7 @@ module.exports = function create( obj ){
   proto._requestFrame = function( ){
     raf.cancel( this._rafId );
     this._rafId = raf( this.frame );
-  }
+  };
 
 
   proto._frame = function( ) {
