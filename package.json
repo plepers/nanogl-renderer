@@ -1,6 +1,6 @@
 {
   "name": "nanogl-renderer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "simple rendering shell for webgl app",
   "main": "renderer.js",
   "scripts": {
