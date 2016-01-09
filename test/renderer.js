@@ -3,17 +3,23 @@ var Renderer = require( '../renderer' );
 var expect  = require( 'expect.js' );
 var sinon = require( 'sinon' );
 
-function makeRenderer() {
+function makeRenderer( o ) {
 
   var init   = sinon.spy();
   var resize = sinon.spy();
   var render = sinon.spy();
 
-  var RendererClass = Renderer( {
+  var opt = {
     init : init,
     resize : resize,
     render : render
-  })
+  }
+
+  for( var k in o ){
+    opt[k] = o[k];
+  }
+
+  var RendererClass = Renderer( opt )
 
   return {
     _class : RendererClass,
@@ -24,8 +30,8 @@ function makeRenderer() {
 }
 
 
-function makeResizeTest(){
-  var rObj = makeRenderer();
+function makeResizeTest( o ){
+  var rObj = makeRenderer( o );
   var cvs = document.createElement( 'canvas' );
 
   return new  rObj._class( cvs );
@@ -65,7 +71,11 @@ describe( "Renderer", function(){
     r.play()
     expect( r.resize.calledOnce ).to.be.ok()
     expect( r.resize.calledBefore( r.render ) ).to.be.ok()
-    expect( r.resize.calledWith(128, 64) ).to.be.ok()
+
+    expect( r.canvasWidth ).to.be.equal( 128 )
+    expect( r.canvasHeight ).to.be.equal( 64 )
+    expect( r.width ).to.be.equal( 128  * window.devicePixelRatio )
+    expect( r.height ).to.be.equal( 64 * window.devicePixelRatio )
 
     r.dispose()
     document.body.removeChild( cvs )
@@ -92,14 +102,102 @@ describe( "Renderer", function(){
 
     expect( r.resize.calledOnce ).to.be.ok()
     expect( r.resize.calledBefore( r.render ) ).to.be.ok()
-    expect( r.resize.calledWith(128, 128) ).to.be.ok()
+    expect( r.canvasWidth ).to.be.equal( 128 )
+    expect( r.canvasHeight ).to.be.equal( 128 )
+    expect( r.width ).to.be.equal( 128  * window.devicePixelRatio )
+    expect( r.height ).to.be.equal( 128 * window.devicePixelRatio )
 
     r.dispose()
     document.body.removeChild( div )
 
   });
 
-  it( "should call render", function( ){
+
+
+  it( "should use no hdpi", function( ){
+
+    var r = makeResizeTest( { hdpi : false } )
+    var cvs = r.canvas;
+
+    document.body.appendChild( cvs );
+    cvs.style.width = '128px'
+    cvs.style.height = '64px'
+
+    r.play()
+    expect( r.canvasWidth ).to.be.equal( 128 )
+    expect( r.canvasHeight ).to.be.equal( 64 )
+    expect( r.width ).to.be.equal( 128  )
+    expect( r.height ).to.be.equal( 64 )
+
+    r.dispose()
+    document.body.removeChild( cvs )
+
+  });
+
+  it( "should use pixelRatio", function( ){
+
+    var r = makeResizeTest( { pixelRatio : .5 } )
+    var cvs = r.canvas;
+
+    document.body.appendChild( cvs );
+    cvs.style.width = '128px'
+    cvs.style.height = '64px'
+
+    r.play()
+    expect( r.canvasWidth ).to.be.equal( 128 )
+    expect( r.canvasHeight ).to.be.equal( 64 )
+    expect( r.width ).to.be.equal( 64  )
+    expect( r.height ).to.be.equal( 32 )
+
+    r.dispose()
+    document.body.removeChild( cvs )
+
+  });
+
+
+  it( "should update hdpi", function( ){
+
+    var r = makeResizeTest()
+    var cvs = r.canvas;
+
+    document.body.appendChild( cvs );
+    cvs.style.width = '128px'
+    cvs.style.height = '64px'
+
+    r.play()
+    r.hdpi = false
+    r.updateSize()
+
+    expect( r.width ).to.be.equal( 128  )
+    expect( r.height ).to.be.equal( 64 )
+
+    r.dispose()
+    document.body.removeChild( cvs )
+
+  });
+
+  it( "should update pixelRatio", function( ){
+
+    var r = makeResizeTest( )
+    var cvs = r.canvas;
+
+    document.body.appendChild( cvs );
+    cvs.style.width = '128px'
+    cvs.style.height = '64px'
+
+    r.play()
+    r.pixelRatio = 0.5;
+    r.updateSize()
+
+    expect( r.width ).to.be.equal( 64  )
+    expect( r.height ).to.be.equal( 32 )
+
+    r.dispose()
+    document.body.removeChild( cvs )
+
+  });
+
+  it( "should call render as soon as play called()", function( ){
 
     var r = makeResizeTest( )
     var cvs = r.canvas;
@@ -126,6 +224,27 @@ describe( "Renderer", function(){
 
   });
 
+  it( "should call once if played then stopped", function( done ){
+
+    var r = makeResizeTest( )
+    var cvs = r.canvas;
+
+    document.body.appendChild( cvs );
+    cvs.style.width = '128px'
+    cvs.style.height = '64px'
+
+    r.play()
+    r.stop()
+
+    setTimeout( function(){
+      expect( r.render.calledOnce ).to.be.ok()
+      r.dispose()
+      document.body.removeChild( cvs )
+      done()
+    }, 200 )
+
+
+  });
 
   it( "should call render few times", function( done ){
 
