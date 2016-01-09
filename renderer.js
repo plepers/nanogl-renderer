@@ -82,7 +82,7 @@ module.exports = function create( obj ){
     this.width  = this.gl.drawingBufferWidth;
     this.height = this.gl.drawingBufferHeight;
     this.resize();
-  }
+  };
 
 
   proto._checkSize = function( ){
