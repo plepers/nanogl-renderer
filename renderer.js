@@ -7,21 +7,34 @@ var NOOP = function(){};
 module.exports = function create( obj ){
 
 
+  var i_pixelRatio   = ( obj.pixelRatio !== undefined ) ? obj.pixelRatio : 0;
+  var i_hdpi         = ( obj.hdpi !== undefined )       ? obj.hdpi       : true;
+
   var Class = function( cvs ){
 
     var opts = this.getContextOptions();
-    this.gl = cvs.getContext( 'webgl', opts ) || cvs.getContext( 'experimental-webgl', opts ) || cvs.getContext( 'webgl');
+    this.gl = cvs.getContext( 'webgl', opts ) ||
+              cvs.getContext( 'experimental-webgl', opts ) ||
+              cvs.getContext( 'webgl');
 
-    this.canvas = cvs;
-    this.width = 0;
-    this.height = 0;
-    this.frame = this._frame.bind( this );
+    this.canvas       = cvs;
+
+    this.width        = 0;
+    this.height       = 0;
+    this.canvasWidth  = 0;
+    this.canvasHeight = 0;
+
+    this.pixelRatio   = i_pixelRatio;
+    this.hdpi         = i_hdpi;
+
+    this.frame        = this._frame.bind( this );
     this.previousTime = now();
-    this._rafId = 0;
-    this._playing = false;
+    this._rafId       = 0;
+    this._playing     = false;
 
     this.init();
   };
+
 
   var proto = Class.prototype;
 
@@ -56,6 +69,22 @@ module.exports = function create( obj ){
   };
 
 
+  proto.updateSize = function(){
+    var pr = 1.0;
+    if( this.pixelRatio > 0 ){
+      pr = this.pixelRatio;
+    } else if( this.hdpi ){
+      pr = window.devicePixelRatio;
+    }
+
+    this.canvas.width  = pr * this.canvasWidth;
+    this.canvas.height = pr * this.canvasHeight;
+    this.width  = this.gl.drawingBufferWidth;
+    this.height = this.gl.drawingBufferHeight;
+    this.resize();
+  }
+
+
   proto._checkSize = function( ){
     var css = getComputedStyle( this.canvas );
     var w = parseInt( css.getPropertyValue( 'width' ) );
@@ -63,10 +92,10 @@ module.exports = function create( obj ){
     if( isNaN( w ) || isNaN( h ) || w === 0 || h === 0 ){
       return false;
     }
-    if( w !== this.width || h !== this.height ){
-      this.width = w;
-      this.height = h;
-      this.resize( w, h );
+    if( w !== this.canvasWidth || h !== this.canvasHeight ){
+      this.canvasWidth = w;
+      this.canvasHeight = h;
+      this.updateSize();
     }
     return true;
   };

@@ -1,6 +1,6 @@
 {
   "name": "nanogl-renderer",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "simple rendering shell for webgl app",
   "main": "renderer.js",
   "scripts": {
@@ -16,9 +16,9 @@
   "author": "Pierre Lepers",
   "license": "GPL-2.0",
   "bugs": {
-    "url": "https://github.com/plepers/nanogl/issues"
+    "url": "https://github.com/plepers/nanogl-renderer/issues"
   },
-  "homepage": "https://github.com/plepers/nanogl#readme",
+  "homepage": "https://github.com/plepers/nanogl-renderer#readme",
   "devDependencies": {
     "expect.js": "^0.3.1",
     "jshint": "^2.9.1-rc1",
